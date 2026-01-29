@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買餸大考驗 (遊戲版) - Urdu Grocery Challenge</title>
+    
+    <!-- 核心函式庫 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4;
+        }
+        
+        .font-urdu {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            line-height: 2.0; 
+            padding-top: 12px;
+            padding-bottom: 12px;
+            display: block;
+        }
+
+        .animate-bounce-short {
+            animation: bounce 0.5s 1;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // 確保使用全域 React 物件，避免 Babel 模組化錯誤
+        const React = window.React;
+        const ReactDOM = window.ReactDOM;
+        const useState = React.useState;
+        const useEffect = React.useEffect;
+
+        // --- SVG 圖示組件 ---
+        const AppIcon = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" {...props}>
+                <circle cx="256" cy="256" r="256" fill="#f0fdf4" />
+                <path d="M120 160h272v280a32 32 0 0 1-32 32H152a32 32 0 0 1-32-32V160z" fill="#d97706" />
+                <path d="M120 160h272v40H120z" fill="#b45309" />
+                <path d="M180 160V120a76 76 0 0 1 152 0v40" stroke="#b45309" strokeWidth="24" strokeLinecap="round" fill="none" />
+                <path d="M300 300c0-40 40-60 80-60s40 60 0 100-80 0-80-40z" fill="#3b82f6" />
+                <path d="M380 300l40 20v-40z" fill="#3b82f6" />
+                <circle cx="200" cy="280" r="30" fill="#22c55e" />
+                <circle cx="230" cy="310" r="30" fill="#22c55e" />
+                <circle cx="170" cy="310" r="30" fill="#22c55e" />
+                <path d="M200 310v60" stroke="#15803d" strokeWidth="12" strokeLinecap="round" />
+                <path d="M240 400c10 10 30 10 40 0" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
+            </svg>
+        );
+
+        const ShoppingBag = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        );
+        const ShoppingCart = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+        );
+        const Play = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        );
+        const Trophy = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M8 3v8a4 4 0 0 0 8 0V3"/><path d="M12 15v7"/></svg>
+        );
+        const RefreshCw = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+        );
+        const ArrowRight = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        );
+        const Fish = (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6.5 12c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1Z"/><path d="M2 12c0 1.66 1.34 3 3 3 .66 0 1.3-.13 1.88-.38a4 4 0 0 1 3.52 1.26l2.12 2.12a2 2 0 0 0 2.83 0l.7-.71a2 2 0 0 0 0-2.83l-2.12-2.12a4 4 0 0 1-1.26-3.52A4.97 4.97 0 0 0 12 7c-3.87 0-7 2.24-7 5Z"/><path d="M18.36 5.64 12 12"/><path d="m17.66 17.66-6.37-6.37"/></svg>
+        );
+        const Leaf = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.77 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        );
+        const CheckCircle = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        );
+        const XCircle = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+        );
+        const Puzzle = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M19.439 15.424a1 1 0 0 0-1.009-1.504 3 3 0 0 1-3.683-3.683 1 1 0 0 0-1.504-1.009l-9 9a1 1 0 0 0 0 1.414l2.828 2.828a1 1 0 0 0 1.414 0l9-9Z"/><path d="m14.5 9.5-5 5"/><path d="M12 12a3 3 0 0 1 0-6 3 3 0 0 1 0 6Z"/><path d="M12 2a3 3 0 0 1 0 6 3 3 0 0 1 0-6Z"/></svg>
+        );
+
+        // --- 資料設定 ---
+        const VOCABULARY = [
+            // 海鮮類
+            { id: 'shrimp', chinese: '蝦', urdu: 'جھینگا', icon: '🦐', category: 'seafood', imageUrl: 'https://i.postimg.cc/nhHzN2gG/xia.png' },
+            { id: 'scallop', chinese: '帶子', urdu: 'سکیلپ', icon: '🐚', category: 'seafood', imageUrl: 'https://i.postimg.cc/QxgC6w4P/dai-zi.png' },
+            { id: 'oyster', chinese: '牡蠣', urdu: 'اوئیسٹر', icon: '🦪', category: 'seafood', imageUrl: 'https://i.postimg.cc/DyQ0CHjc/Screenshot-2026-01-15-182758.png' },
+            { id: 'salmon', chinese: '三文魚', urdu: 'سالمن', icon: '🐟', category: 'seafood', imageUrl: 'https://i.postimg.cc/TYj1kF74/san-wen-yu.png' },
+            { id: 'crab', chinese: '蟹', urdu: 'کیکڑا', icon: '🦀', category: 'seafood', imageUrl: 'https://i.postimg.cc/SxysHd3T/xie.png' },
+            { id: 'cuttlefish', chinese: '墨魚', urdu: 'کٹل مچھلی', icon: '🐙', category: 'seafood', imageUrl: 'https://i.postimg.cc/65VqHgj0/Screenshot-2026-01-15-182838.png' },
+            { id: 'squid', chinese: '魷魚', urdu: 'سکویڈ', icon: '🦑', category: 'seafood', imageUrl: 'https://i.postimg.cc/4xJdjPqP/you-yu.png' },
+            
+            // 蔬果類
+            { id: 'apple', chinese: '蘋果', urdu: 'سیب', icon: '🍎', category: 'produce', imageUrl: 'https://i.postimg.cc/1R00hC4W/ping-guo.png' },
+            { id: 'carrot', chinese: '胡蘿蔔', urdu: 'گاجر', icon: '🥕', category: 'produce', imageUrl: 'https://i.postimg.cc/mZ33fXhQ/hu-luo-bo.png' },
+            { id: 'grapes', chinese: '葡萄', urdu: 'انگور', icon: '🍇', category: 'produce', imageUrl: 'https://i.postimg.cc/fW77n2kK/pu-tao.png' },
+            { id: 'papaya', chinese: '木瓜', urdu: 'پپیتا', icon: '🍈', category: 'produce', imageUrl: 'https://i.postimg.cc/BZ559YtT/mu-gua.png' },
+            { id: 'tomato', chinese: '蕃茄', urdu: 'ٹماٹر', icon: '🍅', category: 'produce', imageUrl: 'https://i.postimg.cc/MZ002PXr/fan-jia.png' },
+            { id: 'orange', chinese: '橙', urdu: 'اورنج', icon: '🍊', category: 'produce', imageUrl: 'https://i.postimg.cc/Vs99QG5G/cheng.png' },
+            { id: 'corn', chinese: '粟米', urdu: 'مکئی', icon: '🌽', category: 'produce', imageUrl: 'https://i.postimg.cc/3rjj5SWm/Screenshot-2026-01-15-175503.png' },
+            { id: 'pineapple', chinese: '菠蘿', urdu: 'انناس', icon: '🍍', category: 'produce', imageUrl: 'https://i.postimg.cc/T2jjM7hn/Screenshot-2026-01-15-175511.png' },
+        ];
+
+        // --- 主題選擇畫面 ---
+        function TopicSelectScreen({ onSelect }) {
+            return (
+                <div className="flex flex-col items-center justify-center h-full p-10 space-y-8 animate-fade-in">
+                    <h2 className="text-3xl font-bold text-gray-800">請選擇買餸的種類</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-2xl">
+                        <button onClick={() => onSelect('seafood')} className="flex flex-col items-center justify-center p-10 bg-blue-50 border-4 border-blue-200 rounded-3xl hover:bg-blue-100 transition-all hover:scale-105 group shadow-lg">
+                            <div className="bg-blue-200 p-6 rounded-full mb-6 group-hover:scale-110 transition-transform text-6xl">🐟</div>
+                            <span className="text-3xl font-bold text-blue-800">海鮮類</span>
+                            <span className="text-lg text-blue-600 mt-2">Seafood</span>
+                        </button>
+                        <button onClick={() => onSelect('produce')} className="flex flex-col items-center justify-center p-10 bg-green-50 border-4 border-green-200 rounded-3xl hover:bg-green-100 transition-all hover:scale-105 group shadow-lg">
+                                <div className="bg-green-200 p-6 rounded-full mb-6 group-hover:scale-110 transition-transform text-6xl">🥦</div>
+                            <span className="text-3xl font-bold text-green-800">蔬果類</span>
+                            <span className="text-lg text-green-600 mt-2">Vegetables & Fruits</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- 遊戲畫面 ---
+        function GameScreen({ category, onProceedToMatching }) {
+            const [targetItems, setTargetItems] = useState([]);
+            const [shelfItems, setShelfItems] = useState([]); 
+            const [cart, setCart] = useState({});
+            
+            const isSeafood = category === 'seafood';
+            const isProduce = category === 'produce';
+
+            useEffect(() => {
+                const categoryItems = VOCABULARY.filter(item => item.category === category);
+                setShelfItems([...categoryItems].sort(() => 0.5 - Math.random()));
+
+                if (isProduce) {
+                    const fixedTargets = ['apple', 'grapes', 'carrot', 'papaya'];
+                    setTargetItems(fixedTargets.map(id => {
+                        const item = VOCABULARY.find(v => v.id === id);
+                        return { ...item, targetQty: 1 };
+                    }));
+                } else if (isSeafood) {
+                    const fixedTargets = ['shrimp', 'crab', 'squid', 'salmon'];
+                    setTargetItems(fixedTargets.map(id => {
+                        const item = VOCABULARY.find(v => v.id === id);
+                        return { ...item, targetQty: 1 };
+                    }));
+                } else {
+                    const shuffledForTarget = [...categoryItems].sort(() => 0.5 - Math.random());
+                    setTargetItems(shuffledForTarget.slice(0, 3).map(item => ({ ...item, targetQty: Math.floor(Math.random() * 2) + 1 })));
+                }
+            }, [category]);
+
+            const addToCart = (item) => setCart(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }));
+            const removeFromCart = (item) => setCart(prev => {
+                const currentQty = prev[item.id] || 0;
+                if (currentQty <= 0) return prev;
+                return { ...prev, [item.id]: currentQty - 1 };
+            });
+
+            const checkOut = () => {
+                let isCorrect = true;
+                let scoreCalc = 0;
+                const userSelections = [];
+
+                Object.keys(cart).forEach(cartItemId => {
+                    if (cart[cartItemId] > 0) {
+                        const item = VOCABULARY.find(v => v.id === cartItemId);
+                        const target = targetItems.find(t => t.id === cartItemId);
+                        let status = 'wrong'; 
+
+                        if (target && cart[cartItemId] === target.targetQty) {
+                            status = 'correct';
+                            scoreCalc += 10;
+                        } else {
+                            isCorrect = false;
+                            if (!target) scoreCalc = Math.max(0, scoreCalc - 5);
+                        }
+                        
+                        userSelections.push({ ...item, boughtQty: cart[cartItemId], status: status });
+                    }
+                });
+
+                targetItems.forEach(target => {
+                    const inCartQty = cart[target.id] || 0;
+                    if (inCartQty !== target.targetQty) isCorrect = false;
+                });
+
+                onProceedToMatching(scoreCalc, userSelections, cart, isCorrect);
+            };
+
+            return (
+                <div className="flex flex-col h-full bg-gray-50">
+                    <div className="bg-yellow-50 p-4 border-b-2 border-yellow-200 shadow-sm z-10">
+                        <h3 className="text-lg font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                            <ShoppingCart className="w-5 h-5" /> 你的購物清單 (Shopping List)
+                        </h3>
+                        <div className="flex gap-4 overflow-x-auto pb-2">
+                            {targetItems.map((item, idx) => (
+                                <div key={idx} className="flex-shrink-0 bg-white border-2 border-yellow-300 rounded-lg px-6 py-2 flex flex-col items-center min-w-[140px] shadow-sm">
+                                    <span className="text-3xl font-urdu text-indigo-700 leading-normal py-1" dir="rtl">{item.urdu}</span>
+                                    <span className="text-sm font-bold text-gray-500 border-t w-full text-center mt-1 pt-1">數量: {item.targetQty}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 p-6 overflow-y-auto">
+                        <h3 className="text-gray-500 font-bold mb-4 flex items-center gap-2">
+                            {isSeafood ? <Fish className="w-5 h-5"/> : <Leaf className="w-5 h-5"/>}
+                            {isSeafood ? '海鮮攤檔' : '蔬果攤檔'} (Market)
+                        </h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {shelfItems.map(item => {
+                                const qtyInCart = cart[item.id] || 0;
+                                const hasImage = item.imageUrl;
+                                
+                                return (
+                                    <div key={item.id} onClick={() => addToCart(item)} className={`relative bg-white border-2 rounded-2xl flex flex-col items-center cursor-pointer transition-all select-none shadow-sm overflow-hidden ${hasImage ? 'p-4 aspect-[4/3]' : 'p-4 min-h-[160px] justify-center'} ${qtyInCart > 0 ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-200 hover:border-blue-300 hover:shadow-md'} active:scale-95`}>
+                                        {hasImage ? (
+                                            <img src={item.imageUrl} alt={item.chinese} className="w-full h-full object-contain scale-125" />
+                                        ) : (
+                                            <><div className="text-6xl mb-3 drop-shadow-sm">{item.icon}</div><div className="text-gray-800 font-bold text-lg text-center leading-tight">{item.chinese}</div></>
+                                        )}
+                                        {qtyInCart > 0 && (
+                                            <>
+                                                <div className="absolute top-2 right-2 bg-green-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-bounce-short shadow-md z-10">{qtyInCart}</div>
+                                                <button onClick={(e) => { e.stopPropagation(); removeFromCart(item); }} className="absolute top-2 left-2 bg-red-100 text-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-200 font-bold z-10">-</button>
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-white border-t border-gray-200 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-10">
+                        <div className="flex items-center gap-2"><ShoppingBag className="w-6 h-6 text-gray-400" /><span className="text-gray-600">已選 <span className="font-bold text-gray-800 text-xl">{Object.values(cart).reduce((a,b)=>a+b, 0)}</span> 件</span></div>
+                        <button onClick={checkOut} className={`px-8 py-3 rounded-xl font-bold text-white shadow-lg flex items-center gap-2 transform active:scale-95 transition-all ${isSeafood ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'}`}>去結帳 <ArrowRight className="w-5 h-5" /></button>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- 配對畫面 ---
+        function MatchingScreen({ cart, onFinish }) {
+            const [itemsToMatch, setItemsToMatch] = useState([]);
+            const [shuffledWords, setShuffledWords] = useState([]);
+            const [selectedImgId, setSelectedImgId] = useState(null);
+            const [matchedIds, setMatchedIds] = useState([]);
+            const [shakeError, setShakeError] = useState(null);
+
+            useEffect(() => {
+                const uniqueIds = Object.keys(cart).filter(id => cart[id] > 0);
+                const items = uniqueIds.map(id => VOCABULARY.find(v => v.id === id));
+                setItemsToMatch(items);
+
+                const words = items.map(item => ({ id: item.id, urdu: item.urdu }));
+                setShuffledWords(words.sort(() => 0.5 - Math.random()));
+            }, [cart]);
+
+            const handleImgClick = (id) => {
+                if (matchedIds.includes(id)) return;
+                setSelectedImgId(id);
+                setShakeError(null);
+            };
+
+            const handleWordClick = (wordId) => {
+                if (!selectedImgId) return;
+                
+                if (wordId === selectedImgId) {
+                    const newMatched = [...matchedIds, wordId];
+                    setMatchedIds(newMatched);
+                    setSelectedImgId(null);
+                    
+                    if (newMatched.length === itemsToMatch.length) {
+                        setTimeout(() => onFinish(), 800);
+                    }
+                } else {
+                    setShakeError(wordId);
+                    setTimeout(() => setShakeError(null), 500);
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-full bg-indigo-50 p-6 animate-fade-in">
+                    <div className="text-center mb-6">
+                        <h2 className="text-2xl font-bold text-indigo-800 mb-2 flex items-center justify-center gap-2">
+                            <Puzzle className="w-6 h-6" /> 配對大考驗
+                        </h2>
+                        <p className="text-gray-600">請先點擊上方的食材圖片，再點擊下方對應的烏都語單字！</p>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto mb-4 border-b-2 border-indigo-200 pb-4">
+                        <div className="grid grid-cols-3 gap-4 justify-items-center">
+                            {itemsToMatch.map(item => {
+                                const isMatched = matchedIds.includes(item.id);
+                                const isSelected = selectedImgId === item.id;
+                                
+                                return (
+                                    <div 
+                                        key={item.id}
+                                        onClick={() => handleImgClick(item.id)}
+                                        className={`relative w-24 h-24 md:w-32 md:h-32 border-4 rounded-xl flex items-center justify-center bg-white cursor-pointer transition-all transform
+                                            ${isMatched ? 'border-green-400 opacity-50 scale-95' : isSelected ? 'border-indigo-600 scale-110 shadow-lg ring-4 ring-indigo-200' : 'border-white shadow hover:scale-105'}`}
+                                    >
+                                        <div className="w-full h-full p-2 overflow-hidden flex items-center justify-center">
+                                            {item.imageUrl ? (
+                                                <img src={item.imageUrl} className="w-full h-full object-contain scale-125" alt="item" />
+                                            ) : (
+                                                <div className="text-5xl">{item.icon}</div>
+                                            )}
+                                        </div>
+                                        {isMatched && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-green-100 bg-opacity-80 rounded-lg">
+                                                <CheckCircle className="w-10 h-10 text-green-600" />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto pt-2">
+                        <div className="grid grid-cols-2 gap-4">
+                            {shuffledWords.map(word => {
+                                const isMatched = matchedIds.includes(word.id);
+                                const isError = shakeError === word.id;
+
+                                if (isMatched) return null;
+
+                                return (
+                                    <button
+                                        key={word.id}
+                                        onClick={() => handleWordClick(word.id)}
+                                        className={`p-6 rounded-xl text-3xl font-bold font-urdu shadow-md transition-all border-2
+                                            ${isError ? 'bg-red-100 border-red-400 text-red-800 shake' : 'bg-white border-indigo-100 text-indigo-800 hover:bg-indigo-50 hover:border-indigo-300'}
+                                            ${!selectedImgId ? 'opacity-50 cursor-not-allowed' : ''}
+                                        `}
+                                        dir="rtl"
+                                    >
+                                        {word.urdu}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- 結果畫面 ---
+        function ResultScreen({ result, score, report, onRetry, onHome }) {
+            const isSuccess = result === 'success';
+
+            const SelectionItem = ({ item }) => {
+                const isCorrect = item.status === 'correct';
+                return (
+                    <div className={`flex flex-col items-center p-4 rounded-2xl border-4 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'} w-64 relative overflow-hidden shadow-lg transition-transform hover:scale-105`}>
+                        <div className="relative w-full aspect-[4/3] mb-4 p-2 flex items-center justify-center bg-white/50 rounded-lg">
+                            {item.imageUrl ? (
+                                <img src={item.imageUrl} className="w-full h-full object-contain scale-110" alt={item.chinese} />
+                            ) : (
+                                <div className="text-6xl text-center">{item.icon}</div>
+                            )}
+                        </div>
+                        <span className="text-2xl font-bold text-gray-800 z-10 mb-1">{item.chinese}</span>
+                        <span className="text-2xl text-gray-600 font-urdu z-10">{item.urdu}</span>
+                        <span className="text-lg font-bold text-gray-500 mt-2 z-10 border-t border-gray-300 w-full text-center pt-1">數量: {item.boughtQty}</span>
+                        <div className={`absolute top-3 right-3 rounded-full p-2 ${isCorrect ? 'bg-green-500' : 'bg-red-500'} text-white shadow-md z-20`}>
+                            {isCorrect ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="flex flex-col items-center h-full p-6 text-center animate-fade-in overflow-y-auto">
+                    <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${isSuccess ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                        {isSuccess ? <Trophy className="w-10 h-10" /> : <RefreshCw className="w-10 h-10" />}
+                    </div>
+                    <h2 className={`text-2xl font-bold mb-2 ${isSuccess ? 'text-green-700' : 'text-red-700'}`}>
+                        {isSuccess ? '任務完成！Excellent！' : '哎呀！買錯了！'}
+                    </h2>
+                    
+                    <p className="text-gray-600 mb-6 text-lg">
+                        {isSuccess ? '恭喜你完成了挑戰！' : '請查看下方的選擇，看看哪裡買錯了喔！'}
+                    </p>
+
+                    <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+                        <h3 className="text-lg font-bold text-gray-700 mb-4 border-b pb-2 text-left flex items-center gap-2">📝 【結果】 (Result)</h3>
+                        {report && report.length > 0 ? (
+                            <div className="flex flex-wrap justify-center gap-6">
+                                {report.map((item, idx) => (
+                                    <SelectionItem key={`selection-${idx}`} item={item} />
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-400 py-4">你的購物籃是空的喔！</p>
+                        )}
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center pb-6">
+                        <button onClick={onHome} className="px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-600 font-bold hover:bg-gray-50 transition-colors w-full sm:w-auto">返回選單</button>
+                        <button onClick={onRetry} className={`px-8 py-3 rounded-xl text-white font-bold shadow-lg transition-colors flex items-center justify-center gap-2 w-full sm:w-auto ${isSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+                            <RefreshCw className="w-5 h-5" /> 再玩一次
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- 主應用程式 ---
+        function App() {
+            const [mode, setMode] = useState('topic_select'); // topic_select, game, matching, result
+            const [selectedCategory, setSelectedCategory] = useState(null); 
+            const [score, setScore] = useState(0);
+            const [lastGameResult, setLastGameResult] = useState(null);
+            const [gameReport, setGameReport] = useState(null); 
+            const [currentCart, setCurrentCart] = useState({}); 
+
+            // 圖片預載
+            useEffect(() => {
+                VOCABULARY.forEach((item) => {
+                    if (item.imageUrl) {
+                        const img = new Image();
+                        img.src = item.imageUrl;
+                    }
+                });
+            }, []);
+
+            const selectTopic = (category) => {
+                setSelectedCategory(category);
+                setMode('game'); // 直接進入遊戲模式，跳過 Study
+            };
+
+            const startGame = () => setMode('game');
+            const backToTopic = () => {
+                setSelectedCategory(null);
+                setMode('topic_select');
+            };
+
+            const getHeaderLabel = () => {
+                if (!selectedCategory) return null;
+                if (mode === 'game') return selectedCategory === 'seafood' ? '海鮮攤檔' : '蔬果攤檔';
+                if (mode === 'matching') return '配對食材與烏都語';
+                return selectedCategory === 'seafood' ? '購買海鮮' : '購買蔬果';
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-green-50 to-blue-50">
+                    <header className="mb-6 text-center">
+                        <h1 className="text-4xl font-bold text-green-800 mb-2 flex items-center justify-center gap-2 drop-shadow-sm">
+                            <AppIcon className="w-12 h-12" />
+                            買餸大考驗
+                        </h1>
+                        <p className="text-gray-600 font-medium">Urdu Grocery Challenge</p>
+                        {selectedCategory && (
+                            <div className={`mt-2 inline-block px-6 py-2 rounded-full text-base font-bold text-white shadow-md transform transition-all duration-300 ${selectedCategory === 'seafood' ? 'bg-blue-500' : 'bg-green-500'}`}>
+                                {getHeaderLabel()}
+                            </div>
+                        )}
+                    </header>
+
+                    <div className="w-full max-w-5xl bg-white/90 backdrop-blur rounded-3xl shadow-2xl overflow-hidden min-h-[600px] relative border border-white/50">
+                        {mode === 'topic_select' && <TopicSelectScreen onSelect={selectTopic} />}
+                        
+                        {/* 移除了 StudyScreen */}
+
+                        {mode === 'game' && <GameScreen category={selectedCategory} onProceedToMatching={(calculatedScore, report, cart, isCorrect) => {
+                            setLastGameResult(isCorrect ? 'success' : 'fail');
+                            setScore(calculatedScore);
+                            setGameReport(report);
+                            setCurrentCart(cart);
+                            
+                            const hasItems = Object.keys(cart).some(k => cart[k] > 0);
+                            if (hasItems) {
+                                setMode('matching');
+                            } else {
+                                setMode('result');
+                            }
+                        }} />}
+                        {mode === 'matching' && <MatchingScreen cart={currentCart} onFinish={() => setMode('result')} />}
+                        {mode === 'result' && <ResultScreen result={lastGameResult} score={score} report={gameReport} onRetry={startGame} onHome={backToTopic} />}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
