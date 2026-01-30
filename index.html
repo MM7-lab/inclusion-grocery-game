@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>買餸大考驗 (遊戲版) - Urdu Grocery Challenge</title>
     
-    <!-- 設定網頁 Icon (Favicon) - 使用 Data URI 嵌入 SVG -->
+    <!-- 設定網頁 Icon (Favicon) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='none'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23f0fdf4'/%3E%3Cpath d='M120 160h272v280a32 32 0 0 1-32 32H152a32 32 0 0 1-32-32V160z' fill='%23d97706'/%3E%3Cpath d='M120 160h272v40H120z' fill='%23b45309'/%3E%3Cpath d='M180 160V120a76 76 0 0 1 152 0v40' stroke='%23b45309' stroke-width='24' stroke-linecap='round' fill='none'/%3E%3Cpath d='M300 300c0-40 40-60 80-60s40 60 0 100-80 0-80-40z' fill='%233b82f6'/%3E%3Cpath d='M380 300l40 20v-40z' fill='%233b82f6'/%3E%3Ccircle cx='200' cy='280' r='30' fill='%2322c55e'/%3E%3Ccircle cx='230' cy='310' r='30' fill='%2322c55e'/%3E%3Ccircle cx='170' cy='310' r='30' fill='%2322c55e'/%3E%3Cpath d='M200 310v60' stroke='%2315803d' stroke-width='12' stroke-linecap='round'/%3E%3Cpath d='M240 400c10 10 30 10 40 0' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
 
     <!-- 核心函式庫 -->
@@ -83,9 +83,6 @@
         const ShoppingCart = (props) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
         );
-        const Play = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        );
         const Trophy = (props) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M8 3v8a4 4 0 0 0 8 0V3"/><path d="M12 15v7"/></svg>
         );
@@ -121,6 +118,7 @@
             { id: 'crab', chinese: '蟹', urdu: 'کیکڑا', icon: '🦀', category: 'seafood', imageUrl: 'https://i.postimg.cc/SxysHd3T/xie.png' },
             { id: 'cuttlefish', chinese: '墨魚', urdu: 'کٹل مچھلی', icon: '🐙', category: 'seafood', imageUrl: 'https://i.postimg.cc/65VqHgj0/Screenshot-2026-01-15-182838.png' },
             { id: 'squid', chinese: '魷魚', urdu: 'سکویڈ', icon: '🦑', category: 'seafood', imageUrl: 'https://i.postimg.cc/4xJdjPqP/you-yu.png' },
+            { id: 'pomfret', chinese: '倉魚', urdu: 'پمفلیٹ', icon: '🐟', category: 'seafood', imageUrl: 'https://i.postimg.cc/5N5yPT7p/Screenshot-2026-01-15-182848.png' }, // 補上第8項海鮮
             
             // 蔬果類
             { id: 'apple', chinese: '蘋果', urdu: 'سیب', icon: '🍎', category: 'produce', imageUrl: 'https://i.postimg.cc/1R00hC4W/ping-guo.png' },
@@ -196,8 +194,8 @@
                             setGameReport(report);
                             setCurrentCart(cart);
                             
-                            const hasItems = Object.keys(cart).some(k => cart[k] > 0);
-                            if (hasItems) {
+                            // 規則修改：只有在完全正確 (isCorrect) 的情況下，才進入配對模式
+                            if (isCorrect) {
                                 setMode('matching');
                             } else {
                                 setMode('result');
@@ -274,6 +272,7 @@
                 let scoreCalc = 0;
                 const userSelections = [];
 
+                // 檢查購物車中的物品 (含多買的檢查)
                 Object.keys(cart).forEach(cartItemId => {
                     if (cart[cartItemId] > 0) {
                         const item = VOCABULARY.find(v => v.id === cartItemId);
@@ -292,6 +291,7 @@
                     }
                 });
 
+                // 檢查是否所有目標都達成 (含漏買的檢查)
                 targetItems.forEach(target => {
                     const inCartQty = cart[target.id] || 0;
                     if (inCartQty !== target.targetQty) isCorrect = false;
