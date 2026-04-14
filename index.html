@@ -168,7 +168,7 @@
 
             const selectTopic = (category) => {
                 setSelectedCategory(category);
-                setMode('study'); // 改回先進入溫習室
+                setMode('study'); // 進入溫習室
             };
 
             const startGame = () => setMode('game');
@@ -203,7 +203,7 @@
                     <div className="w-full max-w-5xl bg-white/90 backdrop-blur rounded-3xl shadow-2xl overflow-hidden min-h-[600px] relative border border-white/50">
                         {mode === 'topic_select' && <TopicSelectScreen onSelect={selectTopic} />}
                         
-                        {/* 溫習模式 (加入計時器) */}
+                        {/* 溫習模式 (含計時器) */}
                         {mode === 'study' && <StudyScreen category={selectedCategory} onBack={backToTopic} onStartGame={startGame} />}
 
                         {mode === 'game' && <GameScreen category={selectedCategory} onProceedToMatching={(calculatedScore, report, cart, isCorrect) => {
@@ -253,27 +253,21 @@
             const isSeafood = category === 'seafood';
             const textColor = isSeafood ? 'text-blue-900' : 'text-green-900';
             
-            const [timeLeft, setTimeLeft] = useState(60); // 60 秒倒數計時
+            const [timeLeft, setTimeLeft] = useState(60); 
 
             useEffect(() => {
-                // 如果時間到了，自動進入遊戲
                 if (timeLeft <= 0) {
                     onStartGame();
                     return;
                 }
-
-                // 設定每秒扣 1 的計時器
                 const timerId = setInterval(() => {
                     setTimeLeft(prevTime => prevTime - 1);
                 }, 1000);
-
-                // 清除計時器 (Cleanup)
                 return () => clearInterval(timerId);
             }, [timeLeft, onStartGame]);
 
-            // 格式化時間 (顯示為 00:XX)
             const formattedTime = `00:${timeLeft.toString().padStart(2, '0')}`;
-            const isTimeRunningOut = timeLeft <= 10; // 最後 10 秒變色警示
+            const isTimeRunningOut = timeLeft <= 10; 
 
             return (
                 <div className="p-6 h-full flex flex-col bg-gray-50 relative">
@@ -282,7 +276,6 @@
                             <BookOpen className="w-6 h-6" /> {isSeafood ? '海鮮' : '蔬果'}詞彙溫習
                         </h2>
                         
-                        {/* 倒數計時器 UI */}
                         <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xl shadow-inner transition-colors duration-300
                             ${isTimeRunningOut ? 'bg-red-100 text-red-600 animate-pulse-fast' : 'bg-white text-gray-700 border-2 border-gray-200'}`}>
                             <Clock className="w-6 h-6" /> 倒數: {formattedTime}
@@ -325,6 +318,7 @@
                 const categoryItems = VOCABULARY.filter(item => item.category === category);
                 setShelfItems([...categoryItems].sort(() => 0.5 - Math.random()));
 
+                // 目標清單生成邏輯：確保無論如何 targetQty 都固定為 1
                 if (isProduce) {
                     const fixedTargets = ['apple', 'grapes', 'carrot', 'papaya'];
                     setTargetItems(fixedTargets.map(id => {
@@ -339,11 +333,16 @@
                     }));
                 } else {
                     const shuffledForTarget = [...categoryItems].sort(() => 0.5 - Math.random());
-                    setTargetItems(shuffledForTarget.slice(0, 3).map(item => ({ ...item, targetQty: Math.floor(Math.random() * 2) + 1 })));
+                    setTargetItems(shuffledForTarget.slice(0, 4).map(item => ({ ...item, targetQty: 1 })));
                 }
             }, [category]);
 
-            const addToCart = (item) => setCart(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }));
+            // 修改：加入商品至購物車，限制每件商品最多只能有 1 件
+            const addToCart = (item) => setCart(prev => {
+                if (prev[item.id] >= 1) return prev; // 若已達上限 1，不改變狀態
+                return { ...prev, [item.id]: 1 };
+            });
+
             const removeFromCart = (item) => setCart(prev => {
                 const currentQty = prev[item.id] || 0;
                 if (currentQty <= 0) return prev;
@@ -419,7 +418,7 @@
                                         {qtyInCart > 0 && (
                                             <>
                                                 <div className="absolute top-2 right-2 bg-green-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-bounce-short shadow-md z-10">{qtyInCart}</div>
-                                                <button onClick={(e) => { e.stopPropagation(); removeFromCart(item); }} className="absolute top-2 left-2 bg-red-100 text-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-200 font-bold z-10">-</button>
+                                                <button onClick={(e) => { e.stopPropagation(); removeFromCart(item); }} className="absolute top-2 left-2 bg-red-100 text-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-200 font-bold z-10">✕</button>
                                             </>
                                         )}
                                     </div>
