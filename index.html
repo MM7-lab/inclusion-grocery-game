@@ -172,6 +172,7 @@
             };
 
             const startGame = () => setMode('game');
+            const studyAgain = () => setMode('study'); // 返回溫習模式的函式
             const backToTopic = () => {
                 setSelectedCategory(null);
                 setMode('topic_select');
@@ -220,7 +221,8 @@
                             }
                         }} />}
                         {mode === 'matching' && <MatchingScreen cart={currentCart} onFinish={() => setMode('result')} />}
-                        {mode === 'result' && <ResultScreen result={lastGameResult} score={score} report={gameReport} onRetry={startGame} onHome={backToTopic} />}
+                        {/* 將 studyAgain 作為 props 傳遞給 ResultScreen */}
+                        {mode === 'result' && <ResultScreen result={lastGameResult} score={score} report={gameReport} onRetry={startGame} onHome={backToTopic} onStudyAgain={studyAgain} />}
                     </div>
                 </div>
             );
@@ -271,19 +273,16 @@
 
             return (
                 <div className="p-6 h-full flex flex-col bg-gray-50 relative">
-                    {/* 修改：將原本的單行排列改為手機版垂直排列 (flex-col)，平板以上水平排列 (md:flex-row)，並加入適當間距 (gap-4) */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 sticky top-0 z-20 py-4 bg-gray-50/90 backdrop-blur border-b md:border-none">
                         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 text-center">
                             <BookOpen className="w-6 h-6" /> {isSeafood ? '海鮮' : '蔬果'}詞彙溫習
                         </h2>
                         
-                        {/* 手機版滿寬 (w-full)，桌面版自動適應 (md:w-auto) */}
                         <div className={`flex items-center justify-center gap-2 px-6 py-2 rounded-xl font-bold text-2xl shadow-inner transition-colors duration-300 w-full md:w-auto
                             ${isTimeRunningOut ? 'bg-red-100 text-red-600 animate-pulse-fast' : 'bg-white text-gray-700 border-2 border-gray-200'}`}>
                             <Clock className="w-6 h-6" /> 倒數: {formattedTime}
                         </div>
 
-                        {/* 手機版加入明顯邊框與加大的點擊範圍，桌面版恢復簡潔樣式 */}
                         <button onClick={onBack} className="text-gray-500 hover:text-gray-800 px-4 py-3 md:py-2 rounded-xl border-2 border-gray-200 md:border-transparent hover:bg-gray-200 font-bold flex items-center justify-center gap-2 w-full md:w-auto transition-all">
                              <ArrowLeft className="w-5 h-5 md:w-4 md:h-4" /> 返回選單
                         </button>
@@ -349,7 +348,6 @@
                 }
             }, [category]);
 
-            // 修改：加入商品至購物車，限制每件商品最多只能有 1 件
             const addToCart = (item) => setCart(prev => {
                 if (prev[item.id] >= 1) return prev; // 若已達上限 1，不改變狀態
                 const totalItems = Object.values(prev).reduce((sum, qty) => sum + qty, 0);
@@ -563,11 +561,11 @@
         }
 
         // --- 結果畫面 ---
-        function ResultScreen({ result, score, report, onRetry, onHome }) {
+        // 新增傳入 onStudyAgain 參數
+        function ResultScreen({ result, score, report, onRetry, onHome, onStudyAgain }) {
             const isSuccess = result === 'success';
 
             const SelectionItem = ({ item }) => {
-                // 移除個別對錯判定與顏色，統一顯示為中性樣式
                 return (
                     <div className="flex flex-col items-center p-4 rounded-2xl border-4 border-gray-200 bg-white w-64 relative overflow-hidden shadow-lg transition-transform hover:scale-105">
                         <div className="relative w-full aspect-[4/3] mb-4 p-2 flex items-center justify-center bg-gray-50 rounded-lg">
@@ -609,8 +607,15 @@
                             <p className="text-gray-400 py-4">你的購物籃是空的喔！</p>
                         )}
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center pb-6">
+                    
+                    {/* 修改：下方按鈕區域加入了「再溫習一次」按鈕，並允許 flex-wrap 以適應手機螢幕 */}
+                    <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full max-w-2xl justify-center pb-6">
                         <button onClick={onHome} className="px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-600 font-bold hover:bg-gray-50 transition-colors w-full sm:w-auto">返回選單</button>
+                        
+                        <button onClick={onStudyAgain} className="px-6 py-3 border-2 border-blue-300 rounded-xl text-blue-600 font-bold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
+                            <BookOpen className="w-5 h-5" /> 再溫習一次
+                        </button>
+                        
                         <button onClick={onRetry} className={`px-8 py-3 rounded-xl text-white font-bold shadow-lg transition-colors flex items-center justify-center gap-2 w-full sm:w-auto ${isSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
                             <RefreshCw className="w-5 h-5" /> 再玩一次
                         </button>
