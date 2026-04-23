@@ -271,18 +271,21 @@
 
             return (
                 <div className="p-6 h-full flex flex-col bg-gray-50 relative">
-                    <div className="flex justify-between items-center mb-6 sticky top-0 z-20 py-2 bg-gray-50/90 backdrop-blur">
-                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    {/* 修改：將原本的單行排列改為手機版垂直排列 (flex-col)，平板以上水平排列 (md:flex-row)，並加入適當間距 (gap-4) */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 sticky top-0 z-20 py-4 bg-gray-50/90 backdrop-blur border-b md:border-none">
+                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 text-center">
                             <BookOpen className="w-6 h-6" /> {isSeafood ? '海鮮' : '蔬果'}詞彙溫習
                         </h2>
                         
-                        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xl shadow-inner transition-colors duration-300
+                        {/* 手機版滿寬 (w-full)，桌面版自動適應 (md:w-auto) */}
+                        <div className={`flex items-center justify-center gap-2 px-6 py-2 rounded-xl font-bold text-2xl shadow-inner transition-colors duration-300 w-full md:w-auto
                             ${isTimeRunningOut ? 'bg-red-100 text-red-600 animate-pulse-fast' : 'bg-white text-gray-700 border-2 border-gray-200'}`}>
                             <Clock className="w-6 h-6" /> 倒數: {formattedTime}
                         </div>
 
-                        <button onClick={onBack} className="text-gray-500 hover:text-gray-800 px-4 py-2 rounded hover:bg-gray-200 font-bold flex items-center gap-2">
-                             <ArrowLeft className="w-4 h-4" /> 返回選單
+                        {/* 手機版加入明顯邊框與加大的點擊範圍，桌面版恢復簡潔樣式 */}
+                        <button onClick={onBack} className="text-gray-500 hover:text-gray-800 px-4 py-3 md:py-2 rounded-xl border-2 border-gray-200 md:border-transparent hover:bg-gray-200 font-bold flex items-center justify-center gap-2 w-full md:w-auto transition-all">
+                             <ArrowLeft className="w-5 h-5 md:w-4 md:h-4" /> 返回選單
                         </button>
                     </div>
 
@@ -292,7 +295,6 @@
                                 <div key={item.id} className={`bg-white border-2 ${isSeafood ? 'border-blue-100' : 'border-green-100'} rounded-2xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-lg transition-all min-h-[200px]`}>
                                     <div className="text-2xl font-bold text-gray-500 mb-4 tracking-widest border-b pb-2 w-full text-center">{item.chinese}</div>
                                     
-                                    {/* 修改：將圖片容器尺寸與圖片縮放比例放大 */}
                                     <div className="relative w-40 h-40 md:w-48 md:h-48 mb-4 flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden shadow-inner border border-gray-100">
                                         {item.imageUrl ? (
                                             <img src={item.imageUrl} className="w-full h-full object-contain scale-125 p-2" alt={item.chinese} />
