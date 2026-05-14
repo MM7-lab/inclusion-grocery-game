@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>買餸大考驗 (遊戲版) - Urdu Grocery Challenge</title>
     
-    <!-- 設定網頁 Icon (Favicon) -->
+    <!-- 網頁 Icon (Favicon) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='none'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23f0fdf4'/%3E%3Cpath d='M120 160h272v280a32 32 0 0 1-32 32H152a32 32 0 0 1-32-32V160z' fill='%23d97706'/%3E%3Cpath d='M120 160h272v40H120z' fill='%23b45309'/%3E%3Cpath d='M180 160V120a76 76 0 0 1 152 0v40' stroke='%23b45309' stroke-width='24' stroke-linecap='round' fill='none'/%3E%3Cpath d='M300 300c0-40 40-60 80-60s40 60 0 100-80 0-80-40z' fill='%233b82f6'/%3E%3Cpath d='M380 300l40 20v-40z' fill='%233b82f6'/%3E%3Ccircle cx='200' cy='280' r='30' fill='%2322c55e'/%3E%3Ccircle cx='230' cy='310' r='30' fill='%2322c55e'/%3E%3Ccircle cx='170' cy='310' r='30' fill='%2322c55e'/%3E%3Cpath d='M200 310v60' stroke='%2315803d' stroke-width='12' stroke-linecap='round'/%3E%3Cpath d='M240 400c10 10 30 10 40 0' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
 
     <!-- 核心函式庫 -->
@@ -58,7 +58,6 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // 確保使用全域 React 物件，避免 Babel 模組化錯誤
         const React = window.React;
         const ReactDOM = window.ReactDOM;
         const useState = React.useState;
@@ -70,7 +69,7 @@
                 <circle cx="256" cy="256" r="256" fill="#f0fdf4" />
                 <path d="M120 160h272v280a32 32 0 0 1-32 32H152a32 32 0 0 1-32-32V160z" fill="#d97706" />
                 <path d="M120 160h272v40H120z" fill="#b45309" />
-                <path d="M180 160V120a76 76 0 0 1 152 0v40" stroke="#b45309" strokeWidth="24" strokeLinecap="round" fill="none" />
+                <path d="M180 160V120a76 76 0 0 1 152 0v40" stroke="#b45309" stroke-width="24" stroke-linecap="round" fill="none" />
                 <path d="M300 300c0-40 40-60 80-60s40 60 0 100-80 0-80-40z" fill="#3b82f6" />
                 <path d="M380 300l40 20v-40z" fill="#3b82f6" />
                 <circle cx="200" cy="280" r="30" fill="#22c55e" />
@@ -124,17 +123,16 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         );
 
-        // --- 資料設定 (使用外部圖片連結) ---
         const VOCABULARY = [
             // 海鮮類
             { id: 'shrimp', chinese: '蝦', urdu: 'جھینگا', icon: '🦐', category: 'seafood', imageUrl: 'https://i.postimg.cc/nhHzN2gG/xia.png' },
             { id: 'scallop', chinese: '帶子', urdu: 'سکیلپ', icon: '🐚', category: 'seafood', imageUrl: 'https://i.postimg.cc/QxgC6w4P/dai-zi.png' },
-            { id: 'oyster', chinese: '牡蠣', urdu: 'اوئیسٹر', icon: '🦪', category: 'seafood', imageUrl: 'https://i.postimg.cc/DyQ0CHjc/Screenshot-2026-01-15-182758.png' },
+            { id: 'oyster', chinese: '蠔', urdu: 'اوئیسٹر', icon: '🦪', category: 'seafood', imageUrl: 'https://i.postimg.cc/vT7JmCbq/Gemini-Generated-Image-c24pyic24pyic24p.png' }, // 名稱與圖片已更新
             { id: 'salmon', chinese: '三文魚', urdu: 'سالمن', icon: '🐟', category: 'seafood', imageUrl: 'https://i.postimg.cc/TYj1kF74/san-wen-yu.png' },
             { id: 'crab', chinese: '蟹', urdu: 'کیکڑا', icon: '🦀', category: 'seafood', imageUrl: 'https://i.postimg.cc/SxysHd3T/xie.png' },
-            { id: 'cuttlefish', chinese: '墨魚', urdu: 'کٹل مچھلی', icon: '🐙', category: 'seafood', imageUrl: 'https://i.postimg.cc/65VqHgj0/Screenshot-2026-01-15-182838.png' },
+            { id: 'cuttlefish', chinese: '墨魚', urdu: 'کٹل مچھلی', icon: '🐙', category: 'seafood', imageUrl: 'https://i.postimg.cc/WzRQ7T5r/Gemini-Generated-Image-sopi7qsopi7qsopi.png' }, // 圖片已更新
             { id: 'squid', chinese: '魷魚', urdu: 'سکویڈ', icon: '🦑', category: 'seafood', imageUrl: 'https://i.postimg.cc/4xJdjPqP/you-yu.png' },
-            { id: 'pomfret', chinese: '倉魚', urdu: 'پمفلیٹ', icon: '🐟', category: 'seafood', imageUrl: 'https://i.postimg.cc/5N5yPT7p/Screenshot-2026-01-15-182848.png' },
+            { id: 'pomfret', chinese: '倉魚', urdu: 'پمفلیٹ', icon: '🐟', category: 'seafood', imageUrl: 'https://i.postimg.cc/65VqHgj0/Screenshot-2026-01-15-182838.png' }, // 圖片已對調
             
             // 蔬果類
             { id: 'apple', chinese: '蘋果', urdu: 'سیب', icon: '🍎', category: 'produce', imageUrl: 'https://i.postimg.cc/1R00hC4W/ping-guo.png' },
@@ -143,11 +141,10 @@
             { id: 'papaya', chinese: '木瓜', urdu: 'پپیتا', icon: '🍈', category: 'produce', imageUrl: 'https://i.postimg.cc/BZ559YtT/mu-gua.png' },
             { id: 'tomato', chinese: '蕃茄', urdu: 'ٹماٹر', icon: '🍅', category: 'produce', imageUrl: 'https://i.postimg.cc/MZ002PXr/fan-jia.png' },
             { id: 'orange', chinese: '橙', urdu: 'اورنج', icon: '🍊', category: 'produce', imageUrl: 'https://i.postimg.cc/Vs99QG5G/cheng.png' },
-            { id: 'corn', chinese: '粟米', urdu: 'مکئی', icon: '🌽', category: 'produce', imageUrl: 'https://i.postimg.cc/3rjj5SWm/Screenshot-2026-01-15-175503.png' },
-            { id: 'pineapple', chinese: '菠蘿', urdu: 'انناس', icon: '🍍', category: 'produce', imageUrl: 'https://i.postimg.cc/T2jjM7hn/Screenshot-2026-01-15-175511.png' },
+            { id: 'corn', chinese: '粟米', urdu: 'مکئی', icon: '🌽', category: 'produce', imageUrl: 'https://i.postimg.cc/GtYjM9P9/44.png' }, // 圖片已更新
+            { id: 'pineapple', chinese: '菠蘿', urdu: 'انناس', icon: '🍍', category: 'produce', imageUrl: 'https://i.postimg.cc/JzyzSJD4/bo-luo.png' }, // 圖片已更新
         ];
 
-        // --- 主應用程式 ---
         function App() {
             const [mode, setMode] = useState('topic_select'); // topic_select, study, game, matching, result
             const [selectedCategory, setSelectedCategory] = useState(null); 
@@ -228,7 +225,6 @@
             );
         }
 
-        // --- 主題選擇畫面 ---
         function TopicSelectScreen({ onSelect }) {
             return (
                 <div className="flex flex-col items-center justify-center h-full p-10 space-y-8 animate-fade-in">
@@ -249,7 +245,6 @@
             );
         }
 
-        // --- 溫習畫面 (含 60 秒計時器) ---
         function StudyScreen({ category, onBack, onStartGame }) {
             const items = VOCABULARY.filter(item => item.category === category);
             const isSeafood = category === 'seafood';
@@ -316,7 +311,6 @@
             );
         }
 
-        // --- 遊戲畫面 ---
         function GameScreen({ category, onProceedToMatching }) {
             const [targetItems, setTargetItems] = useState([]);
             const [shelfItems, setShelfItems] = useState([]); 
@@ -348,6 +342,7 @@
                 }
             }, [category]);
 
+            // 修改：加入商品至購物車，限制每件商品最多只能有 1 件
             const addToCart = (item) => setCart(prev => {
                 if (prev[item.id] >= 1) return prev; // 若已達上限 1，不改變狀態
                 const totalItems = Object.values(prev).reduce((sum, qty) => sum + qty, 0);
@@ -452,7 +447,6 @@
             );
         }
 
-        // --- 配對畫面 ---
         function MatchingScreen({ cart, onFinish }) {
             const [itemsToMatch, setItemsToMatch] = useState([]);
             const [shuffledWords, setShuffledWords] = useState([]);
@@ -560,8 +554,6 @@
             );
         }
 
-        // --- 結果畫面 ---
-        // 新增傳入 onStudyAgain 參數
         function ResultScreen({ result, score, report, onRetry, onHome, onStudyAgain }) {
             const isSuccess = result === 'success';
 
@@ -608,7 +600,6 @@
                         )}
                     </div>
                     
-                    {/* 修改：下方按鈕區域加入了「再溫習一次」按鈕，並允許 flex-wrap 以適應手機螢幕 */}
                     <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full max-w-2xl justify-center pb-6">
                         <button onClick={onHome} className="px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-600 font-bold hover:bg-gray-50 transition-colors w-full sm:w-auto">返回選單</button>
                         
