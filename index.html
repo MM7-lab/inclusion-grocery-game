@@ -69,7 +69,7 @@
                 <circle cx="256" cy="256" r="256" fill="#f0fdf4" />
                 <path d="M120 160h272v280a32 32 0 0 1-32 32H152a32 32 0 0 1-32-32V160z" fill="#d97706" />
                 <path d="M120 160h272v40H120z" fill="#b45309" />
-                <path d="M180 160V120a76 76 0 0 1 152 0v40" stroke="#b45309" stroke-width="24" stroke-linecap="round" fill="none" />
+                <path d="M180 160V120a76 76 0 0 1 152 0v40" stroke="#b45309" strokeWidth="24" strokeLinecap="round" fill="none" />
                 <path d="M300 300c0-40 40-60 80-60s40 60 0 100-80 0-80-40z" fill="#3b82f6" />
                 <path d="M380 300l40 20v-40z" fill="#3b82f6" />
                 <circle cx="200" cy="280" r="30" fill="#22c55e" />
@@ -554,13 +554,16 @@
             );
         }
 
+        // --- 結果畫面 ---
         function ResultScreen({ result, score, report, onRetry, onHome, onStudyAgain }) {
             const isSuccess = result === 'success';
 
             const SelectionItem = ({ item }) => {
+                const isCorrect = item.status === 'correct';
+                
                 return (
-                    <div className="flex flex-col items-center p-4 rounded-2xl border-4 border-gray-200 bg-white w-64 relative overflow-hidden shadow-lg transition-transform hover:scale-105">
-                        <div className="relative w-full aspect-[4/3] mb-4 p-2 flex items-center justify-center bg-gray-50 rounded-lg">
+                    <div className={`flex flex-col items-center p-4 rounded-2xl border-4 ${isCorrect ? 'border-green-400 bg-green-50' : 'border-red-200 bg-red-50'} w-64 relative overflow-hidden shadow-lg transition-transform hover:scale-105`}>
+                        <div className="relative w-full aspect-[4/3] mb-4 p-2 flex items-center justify-center bg-white/50 rounded-lg">
                             {item.imageUrl ? (
                                 <img src={item.imageUrl} className="w-full h-full object-contain scale-110" alt={item.chinese} />
                             ) : (
@@ -570,6 +573,11 @@
                         <span className="text-2xl font-bold text-gray-800 z-10 mb-1">{item.chinese}</span>
                         <span className="text-2xl text-gray-600 font-urdu z-10">{item.urdu}</span>
                         <span className="text-lg font-bold text-gray-500 mt-2 z-10 border-t border-gray-300 w-full text-center pt-1">數量: {item.boughtQty}</span>
+                        
+                        {/* 顯示打勾或打叉圖示 */}
+                        <div className={`absolute top-3 right-3 rounded-full p-2 ${isCorrect ? 'bg-green-500' : 'bg-red-500'} text-white shadow-md z-20`}>
+                            {isCorrect ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
+                        </div>
                     </div>
                 );
             };
